@@ -87,16 +87,11 @@ def maze(cells=(25, 25), start=(0, 0), exit=(-1, -1)):
     # When the number of open cells equals the original passed mazesize,
     # The algorithm has filled up the maze and may stop.
     cellcnt = 1
-    # True when using the deque as a queue, otherwise as a stack.
-    # Using the rotflag, it's possible to have long branching
-    # dead ends in addition to multiple short ones, making it
-    # more difficult to solve by hand.
-    rotflag = False
     # If all of the original nodes have been visited, the maze is done.
     while cellcnt != nsize:
         itercnt += 1
         # Obtain current cell.
-        thispos = mpath[0] if rotflag else mpath[-1]
+        thispos = mpath[-1]
         thiscel = mgrid[thispos[0], thispos[1]]
         # print(mgrid[:,:,0])
         while thiscel[1]:
@@ -111,7 +106,6 @@ def maze(cells=(25, 25), start=(0, 0), exit=(-1, -1)):
             if nextcel[1] & odir:
                 nextcel[1] -= odir
             if nextcel[0]:
-                rotflag = False
                 cellcnt += 1
                 # Get the position of the wall to open.
                 wallpos = thispos + vdir
@@ -124,19 +118,13 @@ def maze(cells=(25, 25), start=(0, 0), exit=(-1, -1)):
                 break
         else:
             # There are no more unexplored directions, backtrack.
-            # If the end of the stack failed, try the queue.
-            if not rotflag:
-                mpath.pop()
-                rotflag = True
-            else:
-                mpath.popleft()
-            continue
+            mpath.pop()
     print("Performed", itercnt, "iterations for maze of size", nsize)
     # Return only the binary array of walls and paths.
     return mgrid[:,:,0]
 
 if __name__ == '__main__':
-    newmaze = maze((100, 100))
+    newmaze = maze((100, 100), (50, 0), (50, -1))
     plt.imsave('maze.png', newmaze, cmap=plt.cm.binary)
     plt.figure(figsize=(9, 8))
     plt.imshow(newmaze, cmap=plt.cm.binary, interpolation='nearest')
